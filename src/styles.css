@@ -1,0 +1,571 @@
+/* ============================================================
+   Percent Wheel — a quiet digital manipulative for fractions as
+   percentages. Palette and components follow Add Blocks.
+   ============================================================ */
+
+:root {
+  --canvas: #f7f9fa; /* warm off-white page */
+  --surface: #eef3f5; /* trays and cards */
+  --surface-2: #e4ecef;
+  --block: #91c7df; /* filled pieces */
+  --block-strong: #4e91b2; /* selected / focus reinforcement */
+  --outline: #78909c; /* empty cells and dividers */
+  --text: #17242b; /* near-black primary text */
+  --text-muted: #52656f; /* secondary labels */
+  --focus: #1f6f95;
+  --danger: #9a4a3f;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 1px 2px rgba(23, 36, 43, 0.08), 0 6px 18px rgba(23, 36, 43, 0.06);
+
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: linear-gradient(160deg, #f7f9fa 0%, #eef3f6 55%, #e6eef2 100%);
+  background-attachment: fixed;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1.4;
+}
+
+#app {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  z-index: 50;
+  background: var(--text);
+  color: var(--canvas);
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: top 0.16s ease;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.btn {
+  font: inherit;
+  font-weight: 600;
+  min-height: 48px;
+  padding: 0.6rem 1.15rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.16s ease, box-shadow 0.16s ease,
+    border-color 0.16s ease, color 0.16s ease;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.btn--primary {
+  background: var(--text);
+  color: var(--canvas);
+  box-shadow: var(--shadow);
+}
+.btn--primary:not(:disabled):hover {
+  background: #24363f;
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--outline);
+}
+.btn--ghost:not(:disabled):hover {
+  background: var(--surface);
+  border-color: var(--text-muted);
+}
+
+:where(button, a, input, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+
+/* ---------------------------------------------------------------- menu */
+
+/* A minimal hamburger fixed to the upper-right corner, on every screen. */
+.menu-toggle {
+  position: fixed;
+  top: clamp(0.6rem, 1.6vw, 1.1rem);
+  right: clamp(0.6rem, 1.6vw, 1.1rem);
+  z-index: 70;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--surface-2);
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 13px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: background 0.16s ease, box-shadow 0.16s ease, transform 0.08s ease;
+}
+.menu-toggle:hover {
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(23, 36, 43, 0.12), 0 10px 24px rgba(23, 36, 43, 0.1);
+}
+.menu-toggle:active {
+  transform: translateY(1px);
+}
+.menu-toggle__bars {
+  position: relative;
+  width: 20px;
+  height: 14px;
+}
+.menu-toggle__bar {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--text);
+  transition: transform 0.22s ease, opacity 0.16s ease;
+}
+.menu-toggle__bar:nth-child(1) {
+  top: 0;
+}
+.menu-toggle__bar:nth-child(2) {
+  top: 6px;
+}
+.menu-toggle__bar:nth-child(3) {
+  top: 12px;
+}
+.menu-toggle--open .menu-toggle__bar:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.menu-toggle--open .menu-toggle__bar:nth-child(2) {
+  opacity: 0;
+}
+.menu-toggle--open .menu-toggle__bar:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.menu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(23, 36, 43, 0.16);
+  animation: menu-fade 0.16s ease;
+}
+
+.menu-panel {
+  position: fixed;
+  top: clamp(3.4rem, 6vw, 4rem);
+  right: clamp(0.6rem, 1.6vw, 1.1rem);
+  z-index: 71;
+  width: min(340px, calc(100vw - 1.2rem));
+  background: var(--canvas);
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 44px rgba(23, 36, 43, 0.24);
+  padding: 0.2rem 1.1rem 1rem;
+  transform-origin: top right;
+  animation: menu-pop 0.18s ease;
+}
+.menu-panel__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0.9rem 0.2rem 0.1rem;
+}
+.menu-panel__body {
+  display: grid;
+  gap: 0.1rem;
+}
+.menu-panel__body .switch:first-child {
+  border-top: none;
+}
+@keyframes menu-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.2rem;
+  border-top: 1px solid var(--surface-2);
+}
+.switch__label {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+.switch__name {
+  font-weight: 600;
+}
+.switch__desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.switch__control {
+  position: relative;
+  flex: none;
+}
+.switch__input {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* keep the input above the track so the visible switch is clickable */
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.switch__track {
+  display: block;
+  width: 52px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--outline);
+  transition: background 0.16s ease;
+  position: relative;
+}
+.switch__track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.16s ease;
+}
+.switch__input:checked + .switch__track {
+  background: var(--block-strong);
+}
+.switch__input:checked + .switch__track::after {
+  transform: translateX(22px);
+}
+.switch__input:focus-visible + .switch__track {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- activity */
+
+.screen {
+  /* Everything is sized so the fraction, wheel and button fit one screen. */
+  --wheel: clamp(220px, min(90vw, 100dvh - 22rem), 560px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.8rem, 2.4vh, 1.6rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(0.8rem, 2.5vh, 2rem) clamp(0.9rem, 4vw, 2.6rem) clamp(1rem, 3vh, 2.4rem);
+}
+
+.head {
+  text-align: center;
+  /* keep clear of the fixed menu toggle on narrow screens */
+  padding-inline: 3.4rem;
+}
+.head__title {
+  margin: 0;
+  font-size: clamp(1.1rem, 3.4vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.head__hint {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* fraction and percent, side by side (the percent wraps below if it must) */
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: clamp(0.8rem, 3vw, 1.6rem);
+  row-gap: 0.2rem;
+}
+
+.fraction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+.fraction__bar {
+  display: block;
+  /* span the numbers, not the − / + buttons beside them */
+  width: calc(100% - 2 * (44px + 0.5rem) + 0.6rem);
+  height: 4px;
+  border-radius: 2px;
+  background: var(--text);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.stepper__value {
+  /* wide enough for "100", and the same for both numbers so they line up */
+  width: calc(3 * 0.62em + 0.4em);
+  font: inherit;
+  font-size: clamp(2.2rem, min(9vw, 6.5vh), 3.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--text);
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.stepper__value:hover {
+  background: var(--surface);
+}
+.stepper__value:focus {
+  background: #fff;
+  border-color: var(--block-strong);
+  outline: none;
+}
+.stepper__btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--surface-2);
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.16s ease, transform 0.08s ease, opacity 0.16s ease;
+}
+.stepper__btn:not(:disabled):hover {
+  background: #fff;
+  border-color: var(--outline);
+}
+.stepper__btn:not(:disabled):active {
+  transform: scale(0.94);
+  background: #dcecf3;
+}
+.stepper__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.stepper__btn:focus-visible {
+  border-radius: 50%;
+}
+
+.percent {
+  min-width: 4.6ch;
+  font-size: clamp(1.6rem, min(7vw, 5vh), 2.6rem);
+  font-weight: 700;
+  color: var(--block-strong);
+  white-space: nowrap;
+}
+.percent[hidden] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- wheel */
+
+.wheel {
+  width: var(--wheel);
+  aspect-ratio: 1;
+  flex: none;
+  border-radius: 50%;
+  cursor: grab;
+  /* the wheel owns every gesture that starts on it */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.wheel--dragging {
+  cursor: grabbing;
+}
+.wheel:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+.wheel__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.wheel__face {
+  fill: var(--surface);
+  filter: drop-shadow(0 3px 8px rgba(23, 36, 43, 0.1));
+}
+.wheel__fill {
+  fill: var(--block);
+}
+.wheel__slices line {
+  stroke: var(--outline);
+  stroke-opacity: 0.45;
+  stroke-width: 0.7;
+  vector-effect: non-scaling-stroke;
+}
+.wheel__rim {
+  fill: none;
+  stroke: var(--outline);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.wheel__start,
+.wheel__edge {
+  stroke: var(--block-strong);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.wheel__hub {
+  fill: var(--block-strong);
+}
+.wheel__handle {
+  fill: #fff;
+  stroke: var(--block-strong);
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 2px 3px rgba(23, 36, 43, 0.25));
+  transition: r 0.12s ease;
+}
+.wheel:hover .wheel__handle,
+.wheel--dragging .wheel__handle {
+  r: 10;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+}
+
+/* Short landscape windows (phones on their side): fraction beside the wheel. */
+@media (max-height: 520px) and (min-width: 600px) {
+  .screen {
+    --wheel: clamp(200px, 100dvh - 6rem, 560px);
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "head wheel"
+      "readout wheel"
+      "controls wheel";
+    align-content: center;
+    justify-content: center;
+    column-gap: clamp(1.5rem, 5vw, 4rem);
+  }
+  .head {
+    grid-area: head;
+    padding-inline: 0;
+  }
+  .readout {
+    grid-area: readout;
+  }
+  .controls {
+    grid-area: controls;
+  }
+  .wheel {
+    grid-area: wheel;
+  }
+}
+
+/* ---------------------------------------------------------------- prefs */
+
+@media (prefers-contrast: more) {
+  :root {
+    --block: #6fb2cf;
+    --outline: #445661;
+    --text-muted: #33454e;
+  }
+  .btn--ghost {
+    border-color: var(--text);
+  }
+}
+
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
