@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="Percent Wheel — see the percent">
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#F7F9FA"/>
+      <stop offset="1" stop-color="#E5F0F5"/>
+    </linearGradient>
+    <linearGradient id="shade" x2="0" y2="1">
+      <stop stop-color="#B1DAEB"/>
+      <stop offset="1" stop-color="#91C7DF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1168" cy="-90" r="335" fill="#DCECF3" opacity=".55"/>
+  <circle cx="554" cy="673" r="240" fill="#FFFFFF" opacity=".35"/>
+
+  <!-- A small version of the wheel, as in the favicon. -->
+  <rect x="78" y="72" width="54" height="54" rx="15" fill="#FFFFFF" stroke="#D5E5EC"/>
+  <circle cx="105" cy="99" r="17" fill="#EEF3F5" stroke="#4E91B2" stroke-width="2.5"/>
+  <path d="M105 99V82A17 17 0 1 1 88 99Z" fill="#91C7DF" stroke="#4E91B2" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="151" y="111" fill="#17242B" font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="36" font-weight="700" letter-spacing="-1.5">Percent Wheel</text>
+
+  <text x="81" y="213" fill="#4E91B2" font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="18" font-weight="700" letter-spacing="3">FRACTIONS AS PERCENTAGES</text>
+  <text x="73" y="317" fill="#17242B" font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="85" font-weight="700" letter-spacing="-5">see the</text>
+  <text x="73" y="415" fill="#246B8D" font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="99" font-weight="700" letter-spacing="-6">percent</text>
+  <text x="80" y="493" fill="#52656F" font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="26">Watch fractions fill the wheel.</text>
+  <text x="80" y="531" fill="#52656F" font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="26">Drag, shade, understand.</text>
+
+  <!-- The card is a simplified, static view of the real activity: 5/8 shaded clockwise from twelve. -->
+  <rect x="647" y="82" width="478" height="503" rx="31" fill="#728E9C" opacity=".13"/>
+  <rect x="637" y="70" width="478" height="503" rx="31" fill="#FFFFFF" stroke="#D5E4EA" stroke-width="2"/>
+  <text x="697" y="131" fill="#17242B" font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="32" font-weight="700">5 / 8</text>
+  <text x="1057" y="131" fill="#52656F" font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="32" font-weight="700" text-anchor="end">= 62.5%</text>
+  <path d="M696 150h361" stroke="#E4ECEF" stroke-width="2"/>
+
+  <circle cx="876" cy="362" r="170" fill="#EEF3F5"/>
+  <path d="M876 362V192A170 170 0 1 1 755.79 482.21Z" fill="url(#shade)"/>
+  <g stroke="#4E91B2" stroke-opacity=".45" stroke-width="2">
+    <path d="M876 362V192M876 362L996.21 241.79M876 362H1046M876 362L996.21 482.21M876 362V532M876 362L755.79 482.21M876 362H706M876 362L755.79 241.79"/>
+  </g>
+  <path d="M876 362V192A170 170 0 1 1 755.79 482.21Z" fill="none" stroke="#4E91B2" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="876" cy="362" r="170" fill="none" stroke="#4E91B2" stroke-width="4"/>
+  <!-- Drag handle at the edge of the shading. -->
+  <circle cx="755.79" cy="482.21" r="13" fill="#FFFFFF" stroke="#246B8D" stroke-width="4"/>
+</svg>
