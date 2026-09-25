@@ -7,7 +7,7 @@ import { Menu } from "./menu";
 import { Stepper } from "./stepper";
 import { Wheel } from "./wheel";
 
-/** Denominators that make friendly percentages, for the "New fraction" button. */
+/** Denominators that make friendly percentages, for the "Random" button. */
 const FRIENDLY_DENOMINATORS = [2, 3, 4, 5, 6, 8, 10, 12, 20, 25, 50, 100];
 
 export class App {
@@ -77,7 +77,7 @@ export class App {
         h("button", {
           class: "btn btn--ghost",
           type: "button",
-          text: "New fraction",
+          text: "Random",
           on: { click: () => this.randomize() },
         }),
       ]),

@@ -1,6 +1,7 @@
 import { describe as group, expect, it } from "vitest";
 import {
   DragTracker,
+  cubicBezier,
   describe,
   formatPercent,
   normalize,
@@ -123,5 +124,38 @@ group("DragTracker", () => {
     const d = new DragTracker();
     d.start(0.2);
     expect(d.move(0.8)).toBe(0.8);
+  });
+});
+
+group("cubicBezier", () => {
+  it("pins the ends and clamps outside [0, 1]", () => {
+    const ease = cubicBezier(0.65, 0, 0.35, 1);
+    expect(ease(0)).toBe(0);
+    expect(ease(1)).toBe(1);
+    expect(ease(-0.5)).toBe(0);
+    expect(ease(2)).toBe(1);
+  });
+
+  it("is the identity for a linear curve", () => {
+    const linear = cubicBezier(0, 0, 1, 1);
+    for (const t of [0.1, 0.25, 0.5, 0.8]) expect(linear(t)).toBeCloseTo(t, 5);
+  });
+
+  it("eases in and out symmetrically", () => {
+    const ease = cubicBezier(0.65, 0, 0.35, 1);
+    expect(ease(0.5)).toBeCloseTo(0.5, 5);
+    expect(ease(0.2)).toBeLessThan(0.2);
+    expect(ease(0.8)).toBeGreaterThan(0.8);
+    expect(ease(0.2) + ease(0.8)).toBeCloseTo(1, 5);
+  });
+
+  it("rises monotonically", () => {
+    const ease = cubicBezier(0.65, 0, 0.35, 1);
+    let prev = 0;
+    for (let i = 1; i <= 100; i++) {
+      const v = ease(i / 100);
+      expect(v).toBeGreaterThanOrEqual(prev);
+      prev = v;
+    }
   });
 });

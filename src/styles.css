@@ -306,7 +306,7 @@ body {
 
 .screen {
   /* Everything is sized so the fraction, wheel and button fit one screen. */
-  --wheel: clamp(220px, min(90vw, 100dvh - 22rem), 560px);
+  --wheel: clamp(220px, min(90vw, 100dvh - 25rem), 560px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -355,7 +355,7 @@ body {
 .fraction__bar {
   display: block;
   /* span the numbers, not the − / + buttons beside them */
-  width: calc(100% - 2 * (44px + 0.5rem) + 0.6rem);
+  width: calc(100% - 2 * (34px + 0.5rem) + 0.6rem);
   height: 4px;
   border-radius: 2px;
   background: var(--text);
@@ -370,9 +370,9 @@ body {
   /* wide enough for "100", and the same for both numbers so they line up */
   width: calc(3 * 0.62em + 0.4em);
   font: inherit;
-  font-size: clamp(2.2rem, min(9vw, 6.5vh), 3.4rem);
+  font-size: clamp(3rem, min(14vw, 9vh), 5.2rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.05;
   text-align: center;
   color: var(--text);
   background: transparent;
@@ -391,16 +391,18 @@ body {
   outline: none;
 }
 .stepper__btn {
+  /* secondary to the number: smaller and quieter, with a full-size tap area */
+  position: relative;
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   font: inherit;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 600;
   line-height: 1;
-  color: var(--text);
+  color: var(--text-muted);
   background: var(--surface);
   border: 1px solid var(--surface-2);
   border-radius: 50%;
@@ -410,7 +412,15 @@ body {
   -webkit-user-select: none;
   transition: background 0.16s ease, transform 0.08s ease, opacity 0.16s ease;
 }
+.stepper__btn::after {
+  /* keep the touch target at 44px while the visible circle is smaller */
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+}
 .stepper__btn:not(:disabled):hover {
+  color: var(--text);
   background: #fff;
   border-color: var(--outline);
 }

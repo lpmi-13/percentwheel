@@ -1,5 +1,6 @@
 import {
   DragTracker,
+  cubicBezier,
   describe,
   numeratorForTurn,
   pointAtTurn,
@@ -12,6 +13,13 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const R = 100;
 /** Above this many slices, full spokes turn to mush; mark the rim instead. */
 const MAX_SPOKES = 50;
+/** Sweep curve for the shading: a gentle start and a soft landing. */
+const EASE = cubicBezier(0.65, 0, 0.35, 1);
+/** Sweep length for a new fraction; scaled by how far the shading travels. */
+const SWEEP_MS = 650;
+const MIN_SWEEP_MS = 250;
+/** Keep the sweep tight while dragging so the shading stays under the finger. */
+const DRAG_SWEEP_MS = 60;
 
 interface WheelOptions {
   fraction: Fraction;
@@ -51,11 +59,10 @@ export class Wheel {
   private onChange: (numerator: number) => void;
   private onRelease: () => void;
 
-  /** The turn currently drawn, which eases toward the fraction's value. */
+  /** The turn currently drawn, which sweeps toward the fraction's value. */
   private shown: number;
   private frame = 0;
-  private lastFrameAt = 0;
-  private easeMs = 90;
+  private sweep = { from: 0, to: 0, startedAt: 0, durationMs: 0 };
 
   private drag = new DragTracker();
   private dragPointer: number | null = null;
@@ -113,8 +120,7 @@ export class Wheel {
     this.fraction = f;
     if (denominatorChanged) this.drawSlices();
     this.updateAria();
-    // Keep the sweep tight while dragging so the shading stays under the finger.
-    this.animateTo(this.dragPointer != null ? 45 : 110);
+    this.animateTo();
   }
 
   setShowSlices(show: boolean): void {
@@ -199,29 +205,30 @@ export class Wheel {
     return this.fraction.numerator / this.fraction.denominator;
   }
 
-  private animateTo(easeMs: number): void {
-    this.easeMs = easeMs;
+  private animateTo(): void {
+    const goal = this.target();
     if (this.reducedMotion) {
       cancelAnimationFrame(this.frame);
       this.frame = 0;
-      this.shown = this.target();
+      this.shown = goal;
       this.draw();
       return;
     }
-    if (this.frame) return;
-    this.lastFrameAt = performance.now();
-    this.frame = requestAnimationFrame(this.tick);
+    // Start from wherever the shading is drawn now, so an interrupted sweep
+    // carries on smoothly toward the new value instead of jumping.
+    const distance = Math.abs(goal - this.shown);
+    const durationMs =
+      this.dragPointer != null ? DRAG_SWEEP_MS : MIN_SWEEP_MS + (SWEEP_MS - MIN_SWEEP_MS) * distance;
+    this.sweep = { from: this.shown, to: goal, startedAt: performance.now(), durationMs };
+    if (!this.frame) this.frame = requestAnimationFrame(this.tick);
   }
 
   private readonly tick = (now: number) => {
-    const dt = Math.min(64, now - this.lastFrameAt);
-    this.lastFrameAt = now;
-    const goal = this.target();
-    // Exponential ease: quick to respond, soft to settle.
-    this.shown += (goal - this.shown) * (1 - Math.exp(-dt / this.easeMs));
-    if (Math.abs(goal - this.shown) < 0.0008) this.shown = goal;
+    const { from, to, startedAt, durationMs } = this.sweep;
+    const progress = Math.min(1, Math.max(0, (now - startedAt) / durationMs));
+    this.shown = from + (to - from) * EASE(progress);
     this.draw();
-    this.frame = this.shown === goal ? 0 : requestAnimationFrame(this.tick);
+    this.frame = progress < 1 ? requestAnimationFrame(this.tick) : 0;
   };
 
   private draw(): void {

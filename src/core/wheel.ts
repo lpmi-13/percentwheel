@@ -124,3 +124,49 @@ export class DragTracker {
     return (this.turn = pointerTurn);
   }
 }
+
+/**
+ * Easing function for a CSS-style cubic-bezier(x1, y1, x2, y2) curve. The
+ * returned function maps progress in [0, 1] to eased progress, solving the
+ * curve's x for the given time and reading off its y.
+ */
+export function cubicBezier(x1: number, y1: number, x2: number, y2: number): (t: number) => number {
+  // Polynomial coefficients for one axis, with P0 = 0 and P3 = 1.
+  const coeffs = (p1: number, p2: number) => {
+    const c = 3 * p1;
+    const b = 3 * (p2 - p1) - c;
+    return { a: 1 - c - b, b, c };
+  };
+  const cx = coeffs(x1, x2);
+  const cy = coeffs(y1, y2);
+  const at = (k: { a: number; b: number; c: number }, s: number) => ((k.a * s + k.b) * s + k.c) * s;
+  const slopeX = (s: number) => (3 * cx.a * s + 2 * cx.b) * s + cx.c;
+
+  const solveX = (x: number): number => {
+    // Newton's method is fast when the curve is well behaved...
+    let s = x;
+    for (let i = 0; i < 8; i++) {
+      const err = at(cx, s) - x;
+      if (Math.abs(err) < 1e-6) return s;
+      const d = slopeX(s);
+      if (Math.abs(d) < 1e-6) break;
+      s -= err / d;
+    }
+    // ...and bisection catches the cases where it isn't.
+    let lo = 0;
+    let hi = 1;
+    s = x;
+    while (hi - lo > 1e-6) {
+      if (at(cx, s) < x) lo = s;
+      else hi = s;
+      s = (lo + hi) / 2;
+    }
+    return s;
+  };
+
+  return (t: number) => {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    return at(cy, solveX(t));
+  };
+}
